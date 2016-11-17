@@ -29,9 +29,6 @@ cdef class OutputContainer(Container):
         :returns: The new :class:`~av.stream.Stream`.
 
         """
-        
-        if (codec_name is None and template is None) or (codec_name is not None and template is not None):
-            raise ValueError('needs one of codec_name or template')
 
         cdef lib.AVCodec *codec
         cdef lib.AVCodecDescriptor *codec_descriptor
@@ -66,14 +63,35 @@ cdef class OutputContainer(Container):
         lib.avcodec_get_context_defaults3(stream.codec, codec)
         stream.codec.codec = codec # Still have to manually set this though...
 
+        cdef void *params = lib.avcodec_parameters_alloc()
+
         # Copy from the template.
         if template is not None:
-            lib.avcodec_copy_context(codec_context, template._codec_context)
-            # Reset the codec tag assuming we are remuxing.
-            codec_context.codec_tag = 0
-            # Copy flags assuming we are remuxing.s
-            if self.proxy.ptr.oformat.flags & lib.AVFMT_GLOBALHEADER:
-                codec_context.flags |= lib.CODEC_FLAG_GLOBAL_HEADER
+            # lib.avcodec_parameters_from_context(params, template._codec_context)
+            # lib.avcodec_parameters_to_context(codec_context, params)
+            # lib.avcodec_parameters_free(&params)
+
+            # # lib.avcodec_copy_context(codec_context, template._codec_context)
+            # # Reset the codec tag assuming we are remuxing.
+            # codec_context.codec_tag = 0
+            # # Copy flags assuming we are remuxing.s
+            # if self.proxy.ptr.oformat.flags & lib.AVFMT_GLOBALHEADER:
+            #     codec_context.flags |= lib.CODEC_FLAG_GLOBAL_HEADER
+
+            codec_context.pix_fmt = template._codec_context.pix_fmt
+            codec_context.width = template._codec_context.width
+            codec_context.height = template._codec_context.height
+            codec_context.bit_rate = template._codec_context.bit_rate
+            codec_context.bit_rate_tolerance = template._codec_context.bit_rate_tolerance
+            codec_context.ticks_per_frame = template._codec_context.ticks_per_frame
+
+            rate = Fraction(rate or 24)
+            codec_context.time_base.num = rate.denominator
+            codec_context.time_base.den = rate.numerator
+
+            # TODO: Should this be inverted from the rate?
+            stream.time_base.num = rate.denominator
+            stream.time_base.den = rate.numerator
 
         # Now lets set some more sane video defaults
         elif codec.type == lib.AVMEDIA_TYPE_VIDEO:
@@ -176,6 +194,3 @@ cdef class OutputContainer(Container):
     def mux(self, Packet packet not None):
         self.start_encoding()
         self.proxy.err_check(lib.av_interleaved_write_frame(self.proxy.ptr, &packet.struct))
-
-
-    

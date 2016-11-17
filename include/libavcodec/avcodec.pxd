@@ -352,5 +352,8 @@ cdef extern from "libavcodec/avcodec.pyav.h" nogil:
      # TODO: avcodec_default_get_buffer is deprecated for avcodec_default_get_buffer2 in newer versions of FFmpeg
     cdef int avcodec_default_get_buffer(AVCodecContext *ctx, AVFrame *frame)
     cdef void avcodec_default_release_buffer(AVCodecContext *ctx, AVFrame *frame)
-    
-    
+
+    cdef void* avcodec_parameters_alloc()
+    cdef void avcodec_parameters_free(void**)
+    cdef int avcodec_parameters_from_context(void *, AVCodecContext *)
+    cdef int avcodec_parameters_to_context(AVCodecContext *, void *)
