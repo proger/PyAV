@@ -1,5 +1,8 @@
 from __future__ import division
 
+import sys
+sys.path.insert(0, '../')
+
 import math
 
 import av
@@ -10,7 +13,7 @@ from tests.common import sandboxed
 
 width = 320
 height = 240
-duration = 96
+duration = 10000
 
 path = sandboxed('rgb_rotate.mov')
 output = av.open(path, 'w')
@@ -29,7 +32,7 @@ for frame_i in xrange(duration):
         int(255 * (0.5 + 0.5 * math.sin(frame_i / duration * 2 * math.pi + 2 / 3 * math.pi))),
         int(255 * (0.5 + 0.5 * math.sin(frame_i / duration * 2 * math.pi + 4 / 3 * math.pi))),
     ))
-    frame.planes[0].update_from_string(image.tostring())
+    frame.planes[0].update_from_string(image.tobytes())
 
     packet = stream.encode(frame)
     if packet:

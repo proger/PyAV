@@ -142,7 +142,7 @@ cdef class ContainerProxy(object):
             self.pos_is_valid = True
 
             # This is effectively the maximum size of reads.
-            self.bufsize = 32 * 1024
+            self.bufsize = 1600 * 1024
             self.buffer = <unsigned char*>lib.av_malloc(self.bufsize)
 
             self.iocontext = lib.avio_alloc_context(
