@@ -63,7 +63,7 @@ cdef class OutputContainer(Container):
         lib.avcodec_get_context_defaults3(stream.codec, codec)
         stream.codec.codec = codec # Still have to manually set this though...
 
-        cdef void *params = lib.avcodec_parameters_alloc()
+        # cdef void *params = lib.avcodec_parameters_alloc()
 
         # Copy from the template.
         if template is not None:
